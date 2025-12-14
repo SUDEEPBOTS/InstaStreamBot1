@@ -1,6 +1,7 @@
-pyrogram==2.0.106  # Latest stable Pyrogram 2.x
+pyrogram==2.0.106
 tgcrypto
-pytgcalls==3.0.0.dev6  # Latest pre-release (par working)
+pytgcalls==3.0.0.dev6
+tgcalls==3.0.0.dev6  # Yeh IMPORTANT line add karo
 instagrapi
 pymongo
 python-dotenv

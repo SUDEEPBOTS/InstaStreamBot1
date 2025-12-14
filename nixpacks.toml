@@ -2,13 +2,12 @@
 nixPkgs = ["python310", "ffmpeg", "git", "gcc", "zlib", "libjpeg", "openjpeg"]
 
 [phases.install]
-cmds = [
-    "python -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel",
-    "pip install -r requirements.txt",
-    "pip install av==10.0.0", 
-    "pip install --no-deps pytgcalls==3.0.0.dev18"
-]
+dependsOn = ["setup"]
+# Note: Ye niche wali line ek lambi command hai, ise todna mat
+cmds = ["python -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && pip install av==10.0.0 && pip install --no-deps tgcalls==3.0.0.dev18 pytgcalls==3.0.0.dev18"]
 
 [phases.start]
-cmds = ["python main.py"]
+dependsOn = ["install"]
+# Start karte waqt bhi venv activate karna zaroori hai
+cmds = ["source .venv/bin/activate && python main.py"]
 

@@ -2,19 +2,13 @@ import os
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-# IMPORTANT: 'py-tgcalls' use karo, 'pytgcalls' nahi
-from py_tgcalls import PyTgCalls
-from py_tgcalls.types import MediaStream
-
+from pytgcalls import PyTgCalls  # Yahaan 'pytgcalls' hai
+from pytgcalls.types import MediaStream  # Yahaan bhi 'pytgcalls' hai
 from dotenv import load_dotenv
-
-# Import Helpers
 from helpers import login_instagram, get_suggested_reels, download_video
 
 load_dotenv()
 
-# --- SETUP ---
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -22,29 +16,22 @@ SESSION_STRING = os.getenv("SESSION_STRING")
 INSTA_USER = os.getenv("INSTA_USER")
 INSTA_PASS = os.getenv("INSTA_PASS")
 
-# Login Insta First
 if not login_instagram(INSTA_USER, INSTA_PASS):
     print("❌ Insta Login Failed. Exiting...")
     exit()
 
 bot = Client("bot_session", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-user = Client("user_session", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
-app = PyTgCalls(user)  # PyTgCalls 'py-tgcalls' se aayega
+user = Client("user_session", api_id=API_ID, api_hash=API_HASH, session_name=SESSION_STRING)  # 'session_name' use karo 1.x ke liye
+app = PyTgCalls(user)
 
-# Format: {chat_id: {'reels': [], 'index': 0, 'msg_id': 123}}
 CHAT_DATA = {}
-
-# --- CORE FUNCTIONS ---
 
 async def play_specific_reel(chat_id, reel_obj):
     try:
-        # 1. Download
         file_path = await asyncio.to_thread(download_video, reel_obj.pk, chat_id)
-        
-        # 2. Stream
         await app.play(
             chat_id,
-            MediaStream(video=file_path, audio=file_path)  # MediaStream bhi 'py-tgcalls' se aayega
+            MediaStream(video=file_path, audio=file_path)
         )
         return True
     except Exception as e:
@@ -58,21 +45,17 @@ def get_control_buttons():
         [InlineKeyboardButton("❌ Band Karo (Stop)", callback_data="stop")]
     ])
 
-# --- COMMANDS ---
-
 @bot.on_message(filters.command("play") & filters.group)
 async def start_bot(client, message):
     chat_id = message.chat.id
     msg = await message.reply_text("🔄 **Instagram se Reels la raha hoon...**")
     
-    # Fetch Initial Reels
     reels = await asyncio.to_thread(get_suggested_reels)
     
     if not reels:
         await msg.edit_text("❌ Reels nahi mili. Insta issue.")
         return
 
-    # Data Setup
     CHAT_DATA[chat_id] = {
         'reels': reels,
         'index': 0,
@@ -80,8 +63,6 @@ async def start_bot(client, message):
     }
     
     await msg.edit_text(f"⬇️ **Downloading Reel 1...**")
-    
-    # Play First
     await play_specific_reel(chat_id, reels[0])
     
     await msg.edit_text(
@@ -113,14 +94,12 @@ async def handle_buttons(client, cb):
 
     if data == "next":
         new_index += 1
-        # --- INFINITE LOOP LOGIC ---
-        # Agar list khatam hone wali hai, toh aur fetch karo
         if new_index >= len(reels):
             await cb.answer("🔄 Loading MORE Reels...", show_alert=True)
             new_reels = await asyncio.to_thread(get_suggested_reels)
             if new_reels:
-                reels.extend(new_reels) # Purani list mein nayi reels jod do
-                CHAT_DATA[chat_id]['reels'] = reels # Update global data
+                reels.extend(new_reels)
+                CHAT_DATA[chat_id]['reels'] = reels
             else:
                 await cb.answer("❌ Aur reels nahi mili.", show_alert=True)
                 return
@@ -135,11 +114,9 @@ async def handle_buttons(client, cb):
             await cb.answer("Ye pehli reel hai!", show_alert=True)
             return
 
-    # Update Index and Play
     CHAT_DATA[chat_id]['index'] = new_index
     current_reel = CHAT_DATA[chat_id]['reels'][new_index]
     
-    # UI Update
     try:
         await msg.edit_text(f"⬇️ **Downloading...**")
         await play_specific_reel(chat_id, current_reel)

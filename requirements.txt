@@ -9,7 +9,8 @@ dnspython
 pyaes==1.6.1
 pysocks==1.7.1
 
-# IMPORTANT: Yeh teen lines EXACT aise hi daalna
+# IMPORTANT: Yahan pehle se jo thi woh rakho, aur pyaes ke liye nayi line add karo
 opencv-python-headless==4.5.3.56
 --only-binary=:all: opencv-python-headless
 --only-binary=:all: numpy
+--only-binary=:all: pyaes  # <--- YEH NAYI LINE ADD KARO

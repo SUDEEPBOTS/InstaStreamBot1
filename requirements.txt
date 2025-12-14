@@ -1,7 +1,7 @@
 pyrogram==2.0.106
-pytgcalls[mtproto]==3.0.0.dev24
+tgcrypto
+pytgcalls==0.9.7
 instagrapi
 pymongo
 python-dotenv
 dnspython
-

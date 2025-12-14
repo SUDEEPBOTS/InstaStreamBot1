@@ -1,8 +1,9 @@
 [phases.setup]
-nixPkgs = ["python310", "ffmpeg", "git", "gcc"]
+nixPkgs = ["python310", "ffmpeg", "git", "gcc", "zlib", "libjpeg", "openjpeg"]
 
 [phases.install]
-cmds = ["python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"]
+# Ye line magic karegi: Pip ko update karke fast install karegi
+cmds = ["python -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel && pip install -r requirements.txt"]
 
 [phases.start]
 cmds = ["python main.py"]

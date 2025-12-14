@@ -2,7 +2,6 @@ numpy==1.26.4
 opencv-python-headless==4.10.0.84
 pyaes==1.6.1
 pyrogram==2.0.106
-pytgcalls==3.0.0.dev18
 TgCrypto
 instagrapi
 pymongo

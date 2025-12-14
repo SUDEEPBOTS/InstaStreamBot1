@@ -1,16 +1,8 @@
+pyaes==1.6.1
 pyrogram==2.0.106
-tgcrypto
-pytgcalls==3.0.0.dev6
-tgcalls==3.0.0.dev6
+pytgcalls==3.0.0.dev18
+TgCrypto
 instagrapi
 pymongo
 python-dotenv
 dnspython
-pyaes
-pysocks==1.7.1
-
-# SABSE IMPORTANT LINES (yeh exact aise hi rakhna):
-opencv-python-headless==4.5.3.56
---only-binary=:all: opencv-python-headless
---only-binary=:all: numpy
---only-binary=:all: pyaes    # <--- YEH LINE ADD KaRO

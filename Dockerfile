@@ -1,41 +1,25 @@
-# Python 3.10 Base Image
-FROM python:3.10-slim
+# Hum 'Slim' ki jagah Full version use karenge (RAM bachane ke liye)
+FROM python:3.10
 
-# 1. System Tools aur FFmpeg Libraries install karo
-# Ye wo libraries hain jo pichli baar missing thi
-RUN apt-get update && apt-get install -y \
-    git \
-    ffmpeg \
-    build-essential \
-    python3-dev \
-    libavformat-dev \
-    libavcodec-dev \
-    libavdevice-dev \
-    libavutil-dev \
-    libswscale-dev \
-    libswresample-dev \
-    libavfilter-dev \
-    pkg-config \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# 2. Working Directory set karo
 WORKDIR /app
 
-# 3. Pip Update karo
-RUN pip install --upgrade pip setuptools wheel
+# 1. Sirf FFmpeg install karo (Baaki sab is image mein pehle se hai)
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
-# 4. Requirements Install karo
-COPY requirements.txt .
+# 2. Files copy karo
+COPY . .
+
+# 3. Pip update aur Requirements install
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 
-# 5. 'av' aur 'pytgcalls' ko manually install karo
-# Ab hamare paas system libraries hain, toh ye aaram se install ho jayenge
+# 4. Critical Libraries ko bina dependency check kiye install karo
+# Taaki wo ladai na karein
 RUN pip install av==10.0.0
 RUN pip install --no-deps pytgcalls==3.0.0.dev18
 
-# 6. Baaki Code Copy karo
-COPY . .
-
-# 7. Bot Start Command
+# 5. Bot Start
 CMD ["python", "main.py"]
+

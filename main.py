@@ -2,8 +2,11 @@ import os
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pytgcalls import PyTgCalls
-from pytgcalls.types import MediaStream
+
+# IMPORTANT: 'py-tgcalls' use karo, 'pytgcalls' nahi
+from py_tgcalls import PyTgCalls
+from py_tgcalls.types import MediaStream
+
 from dotenv import load_dotenv
 
 # Import Helpers
@@ -26,7 +29,7 @@ if not login_instagram(INSTA_USER, INSTA_PASS):
 
 bot = Client("bot_session", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 user = Client("user_session", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
-app = PyTgCalls(user)
+app = PyTgCalls(user)  # PyTgCalls 'py-tgcalls' se aayega
 
 # Format: {chat_id: {'reels': [], 'index': 0, 'msg_id': 123}}
 CHAT_DATA = {}
@@ -41,7 +44,7 @@ async def play_specific_reel(chat_id, reel_obj):
         # 2. Stream
         await app.play(
             chat_id,
-            MediaStream(video=file_path, audio=file_path)
+            MediaStream(video=file_path, audio=file_path)  # MediaStream bhi 'py-tgcalls' se aayega
         )
         return True
     except Exception as e:
@@ -160,4 +163,3 @@ async def stop_cmd(client, message):
 print("🚀 Bot Started with Infinite Scroll!")
 app.start()
 bot.run()
-  

@@ -2,36 +2,54 @@ import os
 from instagrapi import Client
 from database import save_insta_session, load_insta_session
 
-# Instagrapi Client
 cl = Client()
 
 def login_instagram(username, password):
-    print("🔄 Logging into Instagram...")
+    print("🔄 Connecting to Instagram...")
+
+    # --- PLAN A: Browser Cookie (Sabse Fast & Safe) ---
+    session_id = os.getenv("INSTA_SESSIONID")
     
-    # 1. Try to load saved session from MongoDB
+    if session_id:
+        print("🍪 Found Browser Cookie! Logging in via Session ID...")
+        try:
+            # Direct Login via Cookie
+            cl.login_by_sessionid(session_id)
+            
+            print("✅ Login Successful via Cookie!")
+            
+            # Future ke liye isko Database mein save kar lete hain
+            try:
+                save_insta_session(cl.dump_settings())
+            except:
+                pass
+            return True
+        except Exception as e:
+            print(f"❌ Cookie Login Failed: {e}")
+
+    # --- PLAN B: Database Check ---
     try:
         settings = load_insta_session()
         if settings:
+            print("📥 Session found in DB! Loading...")
             cl.load_settings(settings)
             cl.login(username, password)
-            print("✅ Logged in using Saved Session (MongoDB)")
             return True
-    except Exception as e:
-        print(f"⚠️ Session Load Failed: {e}")
+    except:
+        pass
 
-    # 2. New Login if session failed or not found
+    # --- PLAN C: Username/Password (Jo fail ho raha tha) ---
+    print("⚠️ Trying Username/Password Login...")
     try:
         cl.login(username, password)
-        print("✅ New Login Successful")
-        # Save new session to MongoDB
         save_insta_session(cl.dump_settings())
+        print("✅ New Login Successful")
         return True
     except Exception as e:
         print(f"❌ Login Failed: {e}")
         return False
 
 def get_suggested_reels():
-    # 5 Reels ek baar mein layega
     try:
         return cl.clips_suggested(amount=5)
     except Exception as e:
@@ -39,18 +57,15 @@ def get_suggested_reels():
         return []
 
 def download_video(pk, chat_id):
-    # Purani file delete karo space bachane ke liye
     file_name = f"downloads/reel_{chat_id}.mp4"
     if os.path.exists(file_name):
         os.remove(file_name)
     
-    # Folder ensure karo
     if not os.path.exists("downloads"):
         os.makedirs("downloads")
         
     print(f"⬇️ Downloading Reel PK: {pk}")
     path = cl.video_download(pk, folder="downloads")
-    
-    # Rename karke fix naam dena zaroori hai streaming ke liye
     os.rename(path, file_name)
     return file_name
+    

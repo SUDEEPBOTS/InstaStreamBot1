@@ -1,0 +1,6 @@
+pyrogram
+pytgcalls
+instagrapi
+pymongo
+python-dotenv
+dnspython

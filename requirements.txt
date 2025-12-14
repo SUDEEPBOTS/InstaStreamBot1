@@ -8,4 +8,8 @@ python-dotenv
 dnspython
 pyaes==1.6.1
 pysocks==1.7.1
-opencv-python-headless==4.5.3.56  # Yeh line replace karo
+
+# IMPORTANT: Yeh teen lines EXACT aise hi daalna
+opencv-python-headless==4.5.3.56
+--only-binary=:all: opencv-python-headless
+--only-binary=:all: numpy

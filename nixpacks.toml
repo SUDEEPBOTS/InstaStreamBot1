@@ -1,27 +1,28 @@
 [phases.setup]
-nixPkgs = ["python310", "ffmpeg", "git", "gcc", "zlib", "libjpeg", "openjpeg"]
+# 'pkg-config' add kiya hai taaki av library compile ho sake
+nixPkgs = ["python310", "ffmpeg", "git", "gcc", "pkg-config", "zlib", "libjpeg", "openjpeg"]
 
 [phases.install]
 dependsOn = ["setup"]
 cmds = [
-    # 1. Fixed jagah par Venv banao
+    # 1. Virtual Environment banao
     "python3 -m venv /app/venv",
     
-    # 2. Pip update karo
+    # 2. Pip update karo (Wheel support ke liye)
     "/app/venv/bin/pip install --upgrade pip setuptools wheel",
     
-    # 3. Safe libraries install karo
+    # 3. Clean requirements install karo
     "/app/venv/bin/pip install -r requirements.txt",
     
-    # 4. Heavy libraries install karo (Bina Conflict ke)
-    "/app/venv/bin/pip install numpy==1.26.4 opencv-python-headless==4.10.0.84 av==10.0.0 pyaes==1.6.1",
+    # 4. 'av' ko install karo (Ab ye fail nahi hoga kyunki pkg-config hai)
+    "/app/venv/bin/pip install av==10.0.0",
     
-    # 5. Pytgcalls ko zabardasti install karo (Dependencies check kiye bina)
+    # 5. Pytgcalls ko zabardasti install karo
     "/app/venv/bin/pip install --no-deps pytgcalls==3.0.0.dev18"
 ]
 
 [phases.start]
 dependsOn = ["install"]
-# 6. Bot ko usi folder wale Python se chalao
+# 6. Sahi python se bot chalao
 cmds = ["/app/venv/bin/python main.py"]
 

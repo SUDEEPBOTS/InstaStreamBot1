@@ -1,6 +1,6 @@
-pyrogram==2.0.106
+pyrogram==1.4.16  # Version 1.x use karo for compatibility
 tgcrypto
-py-tgcalls>=2.2.8
+pytgcalls==2.1.0  # 'py-tgcalls' ki jagah 'pytgcalls' stable version
 instagrapi
 pymongo
 python-dotenv

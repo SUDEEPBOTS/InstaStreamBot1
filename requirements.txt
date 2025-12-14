@@ -1,10 +1,11 @@
 pyrogram==2.0.106
 tgcrypto
 pytgcalls==3.0.0.dev6
-tgcalls==3.0.0.dev6  # Yeh IMPORTANT line add karo
+tgcalls==3.0.0.dev6
 instagrapi
 pymongo
 python-dotenv
 dnspython
 pyaes==1.6.1
 pysocks==1.7.1
+opencv-python-headless==4.5.3.56  # Yeh line replace karo

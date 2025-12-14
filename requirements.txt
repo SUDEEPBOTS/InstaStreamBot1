@@ -13,4 +13,4 @@ pysocks==1.7.1
 opencv-python-headless==4.5.3.56
 --only-binary=:all: opencv-python-headless
 --only-binary=:all: numpy
---only-binary=:all: pyaes    # <--- YEH LINE ADD KARO
+--only-binary=:all: pyaes    # <--- YEH LINE ADD KaRO

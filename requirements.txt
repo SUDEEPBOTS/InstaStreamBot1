@@ -5,6 +5,7 @@ instagrapi
 pymongo
 python-dotenv
 dnspython
-numpy==1.24.3
-pyaes
+pyaes==1.6.1
+numpy
+opencv-python-headless
 

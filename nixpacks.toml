@@ -3,11 +3,25 @@ nixPkgs = ["python310", "ffmpeg", "git", "gcc", "zlib", "libjpeg", "openjpeg"]
 
 [phases.install]
 dependsOn = ["setup"]
-# Note: Ye niche wali line ek lambi command hai, ise todna mat
-cmds = ["python -m venv .venv && source .venv/bin/activate && pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && pip install av==10.0.0 && pip install --no-deps tgcalls==3.0.0.dev18 pytgcalls==3.0.0.dev18"]
+cmds = [
+    # 1. Fixed jagah par Venv banao
+    "python3 -m venv /app/venv",
+    
+    # 2. Pip update karo
+    "/app/venv/bin/pip install --upgrade pip setuptools wheel",
+    
+    # 3. Safe libraries install karo
+    "/app/venv/bin/pip install -r requirements.txt",
+    
+    # 4. Heavy libraries install karo (Bina Conflict ke)
+    "/app/venv/bin/pip install numpy==1.26.4 opencv-python-headless==4.10.0.84 av==10.0.0 pyaes==1.6.1",
+    
+    # 5. Pytgcalls ko zabardasti install karo (Dependencies check kiye bina)
+    "/app/venv/bin/pip install --no-deps pytgcalls==3.0.0.dev18"
+]
 
 [phases.start]
 dependsOn = ["install"]
-# Start karte waqt bhi venv activate karna zaroori hai
-cmds = ["source .venv/bin/activate && python main.py"]
+# 6. Bot ko usi folder wale Python se chalao
+cmds = ["/app/venv/bin/python main.py"]
 

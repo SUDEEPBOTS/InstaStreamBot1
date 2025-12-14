@@ -6,7 +6,7 @@ instagrapi
 pymongo
 python-dotenv
 dnspython
-pyaes==1.6.1
+pyaes>=1.6.1
 pysocks==1.7.1
 
 # IMPORTANT: Yahan pehle se jo thi woh rakho, aur pyaes ke liye nayi line add karo

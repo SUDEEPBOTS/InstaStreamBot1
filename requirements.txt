@@ -1,7 +1,19 @@
-pyrogram
-tgcrypto
+# Instagram ke liye
+instagrapi
+requests
+
+# Database
 motor
 dnspython
-aiohttp
-# av aur py-tgcalls yahan mat likhna, Dockerfile handle kar lega
+
+# Telegram Bot
+pyrogram
+tgcrypto
+
+# Video Streaming (Ye zaroori hai Dockerfile ke saath match karne ke liye)
+py-tgcalls==3.0.0.dev24
+av==12.0.0
+
+# Environment variables
+python-dotenv
 

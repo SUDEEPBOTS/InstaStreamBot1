@@ -1,9 +1,7 @@
 pyrogram
 tgcrypto
-motor
-dnspython
-instagrapi
-requests
+py-tgcalls==3.0.0.dev24
 python-dotenv
-# py-tgcalls yahan mat likhna, Dockerfile handle karega
+yt-dlp
+requests
 

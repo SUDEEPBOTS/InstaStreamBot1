@@ -1,24 +1,26 @@
-FROM python:3.10-slim-buster
+# 1. Base Image Change: Buster (purana) hata ke Bookworm (naya) lagaya hai
+FROM python:3.10-slim-bookworm
 
 WORKDIR /app
 
-# 1. System updates aur FFmpeg install
+# 2. System updates (Ab ye 404 error nahi dega)
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y ffmpeg git && apt-get clean
 
-# 2. Files copy
+# 3. Files copy
 COPY . .
 
-# 3. Pip update
+# 4. Pip update
 RUN pip install --no-cache-dir --upgrade pip
 
-# 4. Critical Dependencies Install (Ye error fix karega)
-# av 12.0.0 pre-built wheels use karta hai, toh pkg-config error nahi aayega
+# 5. Dependencies Fix:
+# av==12.0.0 (ye binary hai, pkg-config error nahi dega)
+# py-tgcalls==3.0.0.dev24 (stable version)
 RUN pip install av==12.0.0 py-tgcalls==3.0.0.dev24
 
-# 5. Baaki requirements
+# 6. Baaki requirements
 RUN pip install -r requirements.txt
 
-# 6. Bot start
+# 7. Bot start
 CMD ["python3", "main.py"]
 

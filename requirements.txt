@@ -1,12 +1,7 @@
-pyrogram==2.0.106
-tgcrypto==1.2.5
-pyaes==1.6.1
-python-dotenv
+pyrogram
+tgcrypto
+motor
 dnspython
-requests
+aiohttp
+# av aur py-tgcalls yahan mat likhna, Dockerfile handle kar lega
 
-# VC (NO PyAV)
-py-tgcalls==0.9.7
-
-# Instagram (NO deps from here)
-instagrapi==2.0.0

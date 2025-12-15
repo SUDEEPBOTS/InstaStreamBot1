@@ -1,186 +1,95 @@
 import os
 import asyncio
-from pyrogram import Client, filters, idle
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import random
+from pyrogram import Client, filters
 from pytgcalls import PyTgCalls
-from pytgcalls.types import InputStream, InputAudioStream, InputVideoStream
-from dotenv import load_dotenv
-from helpers import login_instagram, get_suggested_reels, download_video
+from pytgcalls.types import MediaStream
+from yt_dlp import YoutubeDL
 
-load_dotenv()
-
+# --- CONFIG ---
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-SESSION_STRING = os.getenv("SESSION_STRING")
-INSTA_USER = os.getenv("INSTA_USER")
-INSTA_PASS = os.getenv("INSTA_PASS")
 
-# Login Check
-if not login_instagram(INSTA_USER, INSTA_PASS):
-    print("❌ Insta Login Failed. Exiting...")
-    exit()
+app = Client("YTShortsBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+call = PyTgCalls(app)
 
-# Clients Setup
-bot = Client("bot_session", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-
-# User Client (String Session)
-user = Client(
-    "user_session", 
-    api_id=API_ID, 
-    api_hash=API_HASH, 
-    session_string=SESSION_STRING # Pyrogram V2 mein session_string parameter use hota hai
-)
-
-app = PyTgCalls(user)
-
-CHAT_DATA = {}
-
-# --- V2 SPECIFIC FUNCTION ---
-async def play_specific_reel(chat_id, reel_obj):
-    try:
-        # Download Video
-        file_path = await asyncio.to_thread(download_video, reel_obj.pk, chat_id)
-        
-        # V2 Syntax: InputStream with Audio & Video separated
-        stream = InputStream(
-            InputAudioStream(file_path),
-            InputVideoStream(file_path)
-        )
-
-        try:
-            # Try to Join (Agar pehli baar chala rahe ho)
-            await app.join_group_call(
-                chat_id,
-                stream,
-                stream_type=InputStream.Type.AudioVideo # Video ke liye zaroori hai
-            )
-        except Exception as e:
-            # Agar already joined hai, toh stream change karo (Next/Prev ke liye)
-            await app.change_stream(
-                chat_id,
-                stream
-            )
-            
-        return True
-    except Exception as e:
-        print(f"Streaming Error: {e}")
-        return False
-
-def get_control_buttons():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⏮ Piche", callback_data="prev"), 
-         InlineKeyboardButton("Aage (Next) ⏭", callback_data="next")],
-        [InlineKeyboardButton("❌ Band Karo (Stop)", callback_data="stop")]
-    ])
-
-@bot.on_message(filters.command("play") & filters.group)
-async def start_msg(client, message):
-    chat_id = message.chat.id
-    msg = await message.reply_text("🔄 **Instagram se Reels la raha hoon...**")
+# --- YOUTUBE DOWNLOADER LOGIC ---
+def get_random_short(chat_id):
+    """
+    YouTube par search karke random Short nikalta hai.
+    """
+    query = random.choice(["trending shorts", "funny shorts", "viral shorts", "status shorts"])
     
-    reels = await asyncio.to_thread(get_suggested_reels)
-    
-    if not reels:
-        await msg.edit_text("❌ Reels nahi mili. Insta issue.")
-        return
-
-    CHAT_DATA[chat_id] = {
-        'reels': reels,
-        'index': 0,
-        'msg': msg
+    ydl_opts = {
+        'format': 'best[ext=mp4]', # Best Quality MP4
+        'noplaylist': True,
+        'quiet': True,
+        'default_search': 'ytsearch5', # Top 5 results layega
+        'outtmpl': f'downloads/short_{chat_id}.%(ext)s',
+        'geo_bypass': True,
     }
-    
-    await msg.edit_text(f"⬇️ **Downloading Reel 1...**")
-    await play_specific_reel(chat_id, reels[0])
-    
-    await msg.edit_text(
-        f"🎬 **Playing Reel 1**\n👤 User: {reels[0].user.username}",
-        reply_markup=get_control_buttons()
-    )
 
-@bot.on_callback_query()
-async def handle_buttons(client, cb):
-    chat_id = cb.message.chat.id
-    data = cb.data
-    
-    if chat_id not in CHAT_DATA:
-        await cb.answer("Session expired. /play again", show_alert=True)
-        return
-
-    ctx = CHAT_DATA[chat_id]
-    reels = ctx['reels']
-    index = ctx['index']
-    msg = ctx['msg']
-
-    if data == "stop":
-        try:
-            await app.leave_group_call(chat_id) # V2 Syntax: leave_group_call
-        except:
-            pass
-        del CHAT_DATA[chat_id]
-        await msg.delete()
-        return
-
-    new_index = index
-
-    if data == "next":
-        new_index += 1
-        if new_index >= len(reels):
-            await cb.answer("🔄 Loading MORE Reels...", show_alert=True)
-            new_reels = await asyncio.to_thread(get_suggested_reels)
-            if new_reels:
-                reels.extend(new_reels)
-                CHAT_DATA[chat_id]['reels'] = reels
-            else:
-                await cb.answer("❌ Aur reels nahi mili.", show_alert=True)
-                return
-        else:
-            await cb.answer("Playing Next...")
-
-    elif data == "prev":
-        if index > 0:
-            new_index -= 1
-            await cb.answer("Playing Previous...")
-        else:
-            await cb.answer("Ye pehli reel hai!", show_alert=True)
-            return
-
-    CHAT_DATA[chat_id]['index'] = new_index
-    current_reel = CHAT_DATA[chat_id]['reels'][new_index]
-    
     try:
-        await msg.edit_text(f"⬇️ **Downloading...**")
-        await play_specific_reel(chat_id, current_reel)
-        await msg.edit_text(
-            f"🎬 **Playing Reel {new_index + 1}**\n👤 User: {current_reel.user.username}",
-            reply_markup=get_control_buttons()
+        with YoutubeDL(ydl_opts) as ydl:
+            print(f"🔍 Searching YouTube for: {query}...")
+            info = ydl.extract_info(query, download=False)
+            
+            # Search results mein se random video pick karo
+            if 'entries' in info:
+                video_entry = random.choice(info['entries'])
+            else:
+                video_entry = info
+
+            video_url = video_entry['webpage_url']
+            title = video_entry.get('title', 'YouTube Short')
+            
+            print(f"⬇️ Downloading: {title}")
+            # Ab Download karo
+            ydl.download([video_url])
+            
+            filename = f"downloads/short_{chat_id}.mp4"
+            return filename, title, video_entry.get('uploader', 'Unknown')
+            
+    except Exception as e:
+        print(f"❌ YT-DLP Error: {e}")
+        return None, None, None
+
+@app.on_message(filters.command("play") & filters.group)
+async def play_shorts(client, message):
+    chat_id = message.chat.id
+    msg = await message.reply_text("🔄 **YouTube se Shorts dhoond raha hoon...**")
+
+    # Download in thread
+    file_path, title, channel = await asyncio.to_thread(get_random_short, chat_id)
+
+    if not file_path:
+        await msg.edit_text("❌ Video nahi mili. Dobara try karo.")
+        return
+
+    await msg.edit_text(f"▶️ **Playing:** {title}\n📺 **Channel:** {channel}")
+
+    try:
+        await call.join_group_call(
+            chat_id,
+            MediaStream(video=file_path, audio=file_path)
         )
     except Exception as e:
-        print(e)
-
-@bot.on_message(filters.command("off") & filters.group)
-async def stop_cmd(client, message):
-    try:
-        await app.leave_group_call(message.chat.id) # V2 Syntax
-        if message.chat.id in CHAT_DATA:
-            del CHAT_DATA[message.chat.id]
-        await message.reply_text("✅ Stopped.")
-    except:
-        pass
-
-# --- STARTUP LOGIC (Async zaroori hai V2 ke liye) ---
-async def start_services():
-    print("🚀 Starting Bot & User Client...")
-    await bot.start()
-    await user.start()
-    await app.start()
-    print("✅ Bot Started with V2.4.1 (Stable Mode)!")
-    await idle()
-    await app.stop()
-    await user.stop()
-    await bot.stop()
+        # Agar already chal raha hai, toh stream change karo
+        try:
+            await call.change_stream(
+                chat_id,
+                MediaStream(video=file_path, audio=file_path)
+            )
+        except:
+            await msg.edit_text(f"❌ Streaming Error: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(start_services())
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
+    
+    print("🚀 YouTube Shorts Bot Started!")
+    app.start()
+    call.start()
+    asyncio.get_event_loop().run_forever()
     

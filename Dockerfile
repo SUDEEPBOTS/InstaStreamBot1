@@ -1,16 +1,22 @@
-# Hum Bani-Banayi Image use kar rahe hain
-# Isme Python + FFmpeg + PyTgCalls pehle se hai!
-FROM pytgcalls/pytgcalls:latest
+FROM python:3.11-slim
+
+# System deps
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libavfilter-dev \
+    libswscale-dev \
+    libswresample-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
-# 1. Sirf Requirements install karo (cache clear karke RAM bachaane ke liye)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 2. Code Copy karo
 COPY . .
 
-# 3. Start Command
-CMD ["python", "main.py"]
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install -r requirements.txt
 
+CMD ["python", "main.py"]

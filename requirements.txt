@@ -5,4 +5,5 @@ pymongo
 python-dotenv
 dnspython
 pyaes==1.6.1
-
+av==10.0.0
+pytgcalls==3.0.0.dev18

@@ -1,16 +1,12 @@
-# Core
 pyrogram==2.0.106
 tgcrypto==1.2.5
 pyaes==1.6.1
 python-dotenv
-requests
 dnspython
+requests
 
 # VC (NO PyAV)
 py-tgcalls==0.9.7
 
-# Instagram (PINNED SAFE VERSION)
+# Instagram (NO deps from here)
 instagrapi==2.0.0
-
-# 🔥 OVERRIDE PyAV (THIS IS THE KEY)
-av>=12.0.0

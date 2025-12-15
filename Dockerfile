@@ -9,12 +9,12 @@ COPY . .
 
 RUN pip install --upgrade pip setuptools wheel
 
-# Important: wheel-only install
-RUN pip install --only-binary=:all: av>=12.0.0
+# 🔥 MOST IMPORTANT LINE (AV FIX)
+RUN pip install --only-binary=:all: "av>=12.0.0"
 
 RUN pip install -r requirements.txt
 
-# Stable VC
+# VC (stable)
 RUN pip install py-tgcalls==0.9.7
 
 CMD ["python", "main.py"]

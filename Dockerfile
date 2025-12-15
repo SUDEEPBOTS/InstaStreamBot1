@@ -8,9 +8,13 @@ WORKDIR /app
 COPY . .
 
 RUN pip install --upgrade pip setuptools wheel
+
+# Important: wheel-only install
+RUN pip install --only-binary=:all: av>=12.0.0
+
 RUN pip install -r requirements.txt
 
-# Stable VC library
+# Stable VC
 RUN pip install py-tgcalls==0.9.7
 
 CMD ["python", "main.py"]

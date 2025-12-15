@@ -5,12 +5,12 @@ from database import save_insta_session, load_insta_session
 
 cl = Client()
 
-
 def login_instagram(username, password):
     print("🔄 Connecting to Instagram...")
 
     session_id = os.getenv("INSTA_SESSIONID")
 
+    # 1. Try Session ID (Cookie)
     if session_id:
         try:
             cl.login_by_sessionid(session_id)
@@ -20,6 +20,7 @@ def login_instagram(username, password):
         except Exception as e:
             print(f"Cookie login failed: {e}")
 
+    # 2. Try Database Session
     try:
         settings = load_insta_session()
         if settings:
@@ -30,6 +31,7 @@ def login_instagram(username, password):
     except:
         pass
 
+    # 3. Fresh Login (Username/Password)
     try:
         cl.login(username, password)
         save_insta_session(cl.dump_settings())
@@ -42,6 +44,7 @@ def login_instagram(username, password):
 
 def get_suggested_reels():
     try:
+        # 5 reels fetch karega
         return cl.clips_suggested(amount=5)
     except Exception as e:
         print(f"Error fetching reels: {e}")
@@ -53,19 +56,21 @@ def download_video(pk, chat_id):
         os.makedirs("downloads")
 
     file_path = f"downloads/reel_{chat_id}.mp4"
+    
+    # Purana file delete karo taaki overwrite ho sake
     if os.path.exists(file_path):
         os.remove(file_path)
 
     print(f"⬇️ Fetching Reel URL for PK: {pk}")
 
-    # 🔥 SAFE: only get URL (NO PyAV)
+    # 🔥 SAFE: Fresh URL fetch kar rahe hain
     media = cl.media_info(pk)
     video_url = media.video_url
 
     if not video_url:
         raise Exception("No video URL found")
 
-    # Download using requests (NO av)
+    # Download using requests (No FFmpeg/AV errors)
     r = requests.get(video_url, stream=True, timeout=30)
     with open(file_path, "wb") as f:
         for chunk in r.iter_content(chunk_size=1024 * 1024):
@@ -73,3 +78,4 @@ def download_video(pk, chat_id):
                 f.write(chunk)
 
     return file_path
+    

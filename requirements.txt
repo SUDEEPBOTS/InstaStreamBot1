@@ -5,6 +5,5 @@ dnspython
 instagrapi
 requests
 python-dotenv
-# Stable Version V2
-py-tgcalls==2.4.1
+# py-tgcalls yahan mat likhna, Dockerfile handle karega
 

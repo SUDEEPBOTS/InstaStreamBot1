@@ -1,19 +1,10 @@
-# Instagram ke liye
-instagrapi
-requests
-
-# Database
-motor
-dnspython
-
-# Telegram Bot
 pyrogram
 tgcrypto
-
-# Video Streaming (Ye zaroori hai Dockerfile ke saath match karne ke liye)
-py-tgcalls==3.0.0.dev24
-av==12.0.0
-
-# Environment variables
+motor
+dnspython
+instagrapi
+requests
 python-dotenv
+# Stable Version V2
+py-tgcalls==2.4.1
 

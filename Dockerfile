@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# System deps
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libavformat-dev \
@@ -18,5 +17,6 @@ COPY . .
 
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
+RUN pip install av==10.0.0
 
 CMD ["python", "main.py"]
